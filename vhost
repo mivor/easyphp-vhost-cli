@@ -37,7 +37,7 @@ get_vhost_data() {
     local data_rest=$(send_data "status_host")
     data_rest=${data_rest#*!}
 
-    while [[ "$data_rest" != "" ]]; do
+    while [[ "$data_rest" ]]; do
 
         vhost=( ${data_rest%%!*} )
         if [[ "$get_vhost" ]]; then
@@ -68,7 +68,7 @@ fi
 # Use cases
 case "$1" in
         st|start)
-            if [[ "$srv_pid" != "" ]]; then
+            if [[ "$srv_pid" ]]; then
                 echo "Server already running!"
             fi
             $exe_path&
@@ -138,7 +138,7 @@ case "$1" in
             #       vhost_name="link-to-vhost" max 65
             #       vhost_link="path-to-vhost" max 80
             get_vhost_data "$2"
-            if [[ "${vhost_data[@]}" != "" ]]; then
+            if [[ "${vhost_data[@]}" ]]; then
                 echo "Virtual Host ${!vhost_name} already exists!"
                 exit 1
             fi
