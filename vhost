@@ -8,7 +8,7 @@
 
 exe_path="/d/Feri_dolgai/Programs/srv/EasyPHP-DevServer-13.1VC11.exe"
 vhost_url="http://127.0.0.1/modules/virtualhostsmanager/virtualhostsmanager_update.php"
-usage="Usage: $0 {start|stop|restart|status|up|down}"
+usage="Usage: vhost {start|stop|restart|status|up|down}"
 srv_pid=""
 
 get_pid() {
@@ -58,7 +58,7 @@ case "$1" in
             fi
             ;;
 
-        up)
+        u|up)
             if [[ "$srv_pid" == "" ]]; then
                 echo "No server!"
                 exit 0;
@@ -124,10 +124,10 @@ case "$1" in
 
             # status vhost
             ;;
-        down)
+        d|down)
             echo "VirtualHost down!"
             ;;
         *)
-            echo "Usage: srv {start|stop|restart|condrestart|status}"
+            echo "$usage"
             exit 1
 esac
