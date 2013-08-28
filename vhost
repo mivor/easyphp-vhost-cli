@@ -11,8 +11,42 @@ vhost_url="http://127.0.0.1/modules/virtualhostsmanager/virtualhostsmanager_upda
 usage="Usage: vhost {start|stop|restart|status|up|down}"
 srv_pid=""
 
+#-------------
+# Functions
+#-------------
+
 get_pid() {
     srv_pid=$(ps aux | grep '[E]asyPHP' | awk '{print $1}')
+}
+
+get_vhost_data() {
+    local data_raw
+    local data_vhost
+    local num
+    data_raw=$(curl -s -G -d "to=status_host" $vhost_url)
+    # echo "raw-data=$data_raw"
+    echo "---------------------------------"
+    data_vhost=${data_raw#*!}
+    echo "vhost_data=$data_vhost"
+    echo "---------------------------------"
+    num=0
+    while [[ "$data_vhost" != "" ]]; do
+        let vhost_$num="empty"
+        vhost_all=vhost_$num[@]
+        eval "vhost_$num=( ${data_vhost%%!*} )"
+        echo ${!vhost_all}
+        # eval $(vhost_${n}=( ${data_vhost%%!*} ))
+        # eval echo "vhost_${n}=${vhost_${n}[@]}"
+        data_vhost=${data_vhost#*!}
+        echo "data_vhost=$data_vhost"
+        echo "---------------------------------"
+        (( num++ ))
+    done
+    echo $num
+    for (( i = 0; i < num; i++ )); do
+        vhost_all=vhost_$i[@]
+        echo ${!vhost_all}
+    done
 }
 
 get_pid
@@ -63,28 +97,10 @@ case "$1" in
                 echo "No server!"
                 exit 0;
             fi
-            echo "VirtualHost up! $1"
-            data_raw=$(curl -G -d "to=status_host" http://127.0.0.1/modules/virtualhostsmanager/virtualhostsmanager_update.php)
-            echo "raw-data=$data_raw"
-            echo "---------------------------------"
-            data_vhost=${data_raw#*!}
-            echo "vhost_data=$data_vhost"
-            echo "---------------------------------"
-            n=0
-            hosts=()
-            while [[ "$data_vhost" != "" ]]; do
-                let vhost_$n="empty"
-                vhost_all=vhost_$n[@]
-                eval "vhost_$n=( ${data_vhost%%!*} )"
-                hosts+=(${!vhost_all})
-                echo ${!vhost_all}
-                # eval $(vhost_${n}=( ${data_vhost%%!*} ))
-                # eval echo "vhost_${n}=${vhost_${n}[@]}"
-                data_vhost=${data_vhost#*!}
-                echo "data_vhost=$data_vhost"
-                echo "---------------------------------"
-            done
-            echo ${#hosts[@]}
+            echo "VirtualHost up! $2"
+            get_vhost_data
+
+
             # # vhost_1=( ${data%!VHOST_END!*} )
             # echo ${test_array[@]}
             # echo "---------------------------------"
