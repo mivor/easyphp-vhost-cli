@@ -1,0 +1,133 @@
+#!/usr/bin/env bash
+
+# Manage EasyPHP dev server.
+
+#-------------
+# Variables
+#-------------
+
+exe_path="/d/Feri_dolgai/Programs/srv/EasyPHP-DevServer-13.1VC11.exe"
+vhost_url="http://127.0.0.1/modules/virtualhostsmanager/virtualhostsmanager_update.php"
+usage="Usage: $0 {start|stop|restart|status|up|down}"
+srv_pid=""
+
+get_pid() {
+    srv_pid=$(ps aux | grep '[E]asyPHP' | awk '{print $1}')
+}
+
+get_pid
+
+echo "$srv_pid"
+# Use cases
+case "$1" in
+        s|start)
+            if [[ "$srv_pid" == "" ]]; then
+                $exe_path&
+                echo "Dev server ready!"
+            else
+                echo "Already running!"
+            fi
+            ;;
+
+        k|kill|stop)
+            if [[ "$srv_pid" != "" ]]; then
+                kill "$srv_pid"
+                echo "Dev server shut down!"
+            else
+                echo "No server to stop!"
+            fi
+            ;;
+
+        rs|rst|restart)
+            if [[ "$srv_pid" != "" ]]; then
+                kill "$srv_pid"
+                $exe_path&
+                get_pid
+                echo "$srv_pid"
+                echo "Dev server reseted!"
+            else
+                echo "No server to restart!"
+            fi
+            ;;
+
+        st|stat|status)
+            if [[ "$srv_pid" == "" ]]; then
+                echo "No server!"
+            else
+                echo "Server running"
+            fi
+            ;;
+
+        up)
+            if [[ "$srv_pid" == "" ]]; then
+                echo "No server!"
+                exit 0;
+            fi
+            echo "VirtualHost up! $1"
+            data_raw=$(curl -G -d "to=status_host" http://127.0.0.1/modules/virtualhostsmanager/virtualhostsmanager_update.php)
+            echo "raw-data=$data_raw"
+            echo "---------------------------------"
+            data_vhost=${data_raw#*!}
+            echo "vhost_data=$data_vhost"
+            echo "---------------------------------"
+            n=0
+            hosts=()
+            while [[ "$data_vhost" != "" ]]; do
+                let vhost_$n="empty"
+                vhost_all=vhost_$n[@]
+                eval "vhost_$n=( ${data_vhost%%!*} )"
+                hosts+=(${!vhost_all})
+                echo ${!vhost_all}
+                # eval $(vhost_${n}=( ${data_vhost%%!*} ))
+                # eval echo "vhost_${n}=${vhost_${n}[@]}"
+                data_vhost=${data_vhost#*!}
+                echo "data_vhost=$data_vhost"
+                echo "---------------------------------"
+            done
+            echo ${#hosts[@]}
+            # # vhost_1=( ${data%!VHOST_END!*} )
+            # echo ${test_array[@]}
+            # echo "---------------------------------"
+            # echo ${#test_array[@]}
+            # echo "'${test_array[3]}'ghoogle"
+            # echo ${test_array[12]}
+            # # "$vhost_path" to=onoff_host&hash=on&servername=post.dev&num_virtualhost=0#anchor_virtualhostsmanager
+            # "$vhost_path" to=onoff_host&hash=off&servername=www.nagyvaradhotel.ro&num_virtualhost=1#anchor_virtualhostsmanager
+            # "$vhost_path" to=onoff_host&hash=on&servername=dev.nagyvaradhotel.ro&num_virtualhost=2#anchor_virtualhostsmanager
+            # "$vhost_path" to=onoff_host&hash=off&servername=posticumhost.ro&num_virtualhost=3#anchor_virtualhostsmanager
+
+            # add vhost
+            #     POST
+            #     to="add_vhost_2"
+            #     lang="en"
+            #       vhost_name="link-to-vhost" max 65
+            #       vhost_link="path-to-vhost" max 80
+
+            # delete vhost
+            #     GET
+            #     to="del_virtualhost"
+            #       num_virtualhost="virtualhost-number"
+
+            # activate vhost
+            #     GET
+            #     to="onoff_host"
+            #       hash="off" #status
+            #       servername="vhst-server-name"
+            #       num_virtualhost="vhost-number"
+
+            # deactivate vhost
+            #     GET
+            #     to="onoff_host"
+            #       hash="on" #status
+            #       servername="vhst-server-name"
+            #       num_virtualhost="vhost-number"
+
+            # status vhost
+            ;;
+        down)
+            echo "VirtualHost down!"
+            ;;
+        *)
+            echo "Usage: srv {start|stop|restart|condrestart|status}"
+            exit 1
+esac
