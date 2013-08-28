@@ -30,6 +30,17 @@ send_data() {
     fi
 }
 
+unset_vars() {
+    unset exe_path
+    unset vhost_url
+    unset usage
+    unset srv_pid
+    unset vhost_data
+    unset vhost_nr
+    unset vhost_name
+    unset vhost_hash
+}
+
 get_vhost_data() {
     local get_vhost="$1"
     local vhost_nr=vhost[0]
