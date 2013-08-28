@@ -53,53 +53,46 @@ get_vhost_data() {
 
     if [[ "$get_vhost" && "$vhost_data" == "" ]]; then
         echo "No vhost found!"
-        exit 1
     fi
 }
 
 get_pid
 
+# check if server is running
+if [[ "$srv_pid" == "" && !("$1" == "st" || "$1" == "start") ]]; then
+    echo "No server found!"
+    echo "(use: \"vhost start\" to start one)"
+    exit 1
+fi
+
 # Use cases
 case "$1" in
         st|start)
-            if [[ "$srv_pid" == "" ]]; then
-                $exe_path&
-                echo "Dev server ready!"
-            else
-                echo "Already running!"
+            if [[ "$srv_pid" != "" ]]; then
+                echo "Server already running!"
             fi
+            $exe_path&
+            echo "Dev server ready!"
             ;;
 
         k|kill|stop)
-            if [[ "$srv_pid" != "" ]]; then
-                kill "$srv_pid"
-                echo "Dev server shut down!"
-            else
-                echo "No server to stop!"
-            fi
+            kill "$srv_pid"
+            echo "Dev server shut down!"
             ;;
 
         rs|rst|restart)
-            if [[ "$srv_pid" != "" ]]; then
-                kill "$srv_pid"
-                $exe_path&
-                get_pid
-                echo "$srv_pid"
-                echo "Dev server reseted!"
-            else
-                echo "No server to restart!"
-            fi
+            kill "$srv_pid"
+            $exe_path&
+            get_pid
+            echo "$srv_pid"
+            echo "Dev server reseted!"
             ;;
 
         s|stat|status)
             # status vhost
-            if [[ "$srv_pid" == "" ]]; then
-                echo "No server!"
-            else
-                echo "Server running! Virtual Hosts:"
-                echo "------------------------------"
-                get_vhost_data
-            fi
+            echo "Server running! Virtual Hosts:"
+            echo "------------------------------"
+            get_vhost_data
             ;;
 
         u|up)
@@ -109,12 +102,6 @@ case "$1" in
             #       hash="off" #status
             #       servername="vhst-server-name"
             #       num_virtualhost="vhost-number"
-
-            if [[ "$srv_pid" == "" ]]; then
-                echo "No server!"
-                exit 0;
-            fi
-
             get_vhost_data "$2"
             echo "VHOST= ${vhost_data[@]}"
             if [[ ${!vhost_hash} == "on" ]]; then
@@ -132,11 +119,6 @@ case "$1" in
             #       hash="on" #status
             #       servername="vhst-server-name"
             #       num_virtualhost="vhost-number"
-            if [[ "$srv_pid" == "" ]]; then
-                echo "No server!"
-                exit 0;
-            fi
-
             get_vhost_data "$2"
             echo "VHOST= ${vhost_data[@]}"
             if [[ ${!vhost_hash} == "off" ]]; then
