@@ -155,9 +155,10 @@ case "$1" in
             #     lang="en"
             #       vhost_name="link-to-vhost" max 65
             #       vhost_link="path-to-vhost" max 80
-            if [[ "$srv_pid" == "" ]]; then
-                echo "No server!"
-                exit 0;
+            get_vhost_data "$2"
+            if [[ "${vhost_data[@]}" != "" ]]; then
+                echo "Virtual Host ${!vhost_name} already exists!"
+                exit 1
             fi
 
 
@@ -169,12 +170,9 @@ case "$1" in
             #     GET
             #     to="del_virtualhost"
             #       num_virtualhost="virtualhost-number"
-            if [[ "$srv_pid" == "" ]]; then
-                echo "No server!"
-                exit 0;
-            fi
-
-
+            get_vhost_data "$2"
+            echo "VHOST= ${vhost_data[@]}"
+            send_data "del_virtualhost"
             echo "VirtualHost ${!vhost_name} removed!"
             ;;
 
