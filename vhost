@@ -41,6 +41,14 @@ unset_vars() {
     unset vhost_hash
 }
 
+echo_and_die() {
+    if [[ "$@" ]]; then
+        echo "$@"
+    fi
+    unset_vars
+    exit 1
+}
+
 get_vhost_data() {
     local get_vhost="$1"
     local vhost_nr=vhost[0]
