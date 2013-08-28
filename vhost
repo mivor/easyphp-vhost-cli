@@ -81,7 +81,7 @@ get_pid
 if [[ "$srv_pid" == "" && !("$1" == "st" || "$1" == "start") ]]; then
     echo "No server found!"
     echo "(use: \"vhost start\" to start one)"
-    exit 1
+    echo_and_die
 fi
 
 # Use cases
@@ -124,8 +124,7 @@ case "$1" in
             get_vhost_data "$2"
             echo "VHOST= ${vhost_data[@]}"
             if [[ ${!vhost_hash} == "on" ]]; then
-                echo "Virtual Host ${!vhost_name} already enabled!"
-                exit 1
+                echo_and_die "Virtual Host ${!vhost_name} already enabled!"
             fi
             send_data "onoff_host"
             echo "VirtualHost ${!vhost_name} up!"
@@ -141,8 +140,7 @@ case "$1" in
             get_vhost_data "$2"
             echo "VHOST= ${vhost_data[@]}"
             if [[ ${!vhost_hash} == "off" ]]; then
-                echo "Virtual Host ${!vhost_name} already disabled!"
-                exit 1
+                echo_and_die "Virtual Host ${!vhost_name} already disabled!"
             fi
             send_data "onoff_host"
 
@@ -158,8 +156,7 @@ case "$1" in
             #       vhost_link="path-to-vhost" max 80
             get_vhost_data "$2"
             if [[ "${vhost_data[@]}" ]]; then
-                echo "Virtual Host ${!vhost_name} already exists!"
-                exit 1
+                echo_and_die "Virtual Host ${!vhost_name} already exists!"
             fi
             send_data "add_vhost_2 $2 $3"
             echo "VirtualHost ${!vhost_name} added!"
@@ -177,6 +174,5 @@ case "$1" in
             ;;
 
         *)
-            echo "$usage"
-            exit 1
+            echo_and_die "$usage"
 esac
