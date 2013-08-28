@@ -8,7 +8,7 @@
 
 exe_path="/d/Feri_dolgai/Programs/srv/EasyPHP-DevServer-13.1VC11.exe"
 vhost_url="http://127.0.0.1/modules/virtualhostsmanager/virtualhostsmanager_update.php"
-usage="Usage: vhost {start|stop|restart|status|up|down}"
+usage="Usage: vhost {start|stop|restart|status|up|down|add|remove}"
 srv_pid=""
 vhost_data=()
 vhost_nr=vhost_data[0]
@@ -119,7 +119,7 @@ case "$1" in
             echo "VHOST= ${vhost_data[@]}"
             if [[ ${!vhost_hash} == "on" ]]; then
                 echo "Virtual Host ${!vhost_name} already enabled!"
-                exit 0
+                exit 1
             fi
             send_data "onoff_host"
             echo "VirtualHost ${!vhost_name} up!"
@@ -160,8 +160,7 @@ case "$1" in
                 echo "Virtual Host ${!vhost_name} already exists!"
                 exit 1
             fi
-
-
+            send_data "add_vhost_2 $2 $3"
             echo "VirtualHost ${!vhost_name} added!"
             ;;
 
