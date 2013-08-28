@@ -22,23 +22,19 @@ get_pid() {
     srv_pid=$(ps aux | grep '[E]asyPHP' | awk '{print $1}')
 }
 
-get_data() {
-    curl -s -G -d "to=$1&hash=${!vhost_hash}&servername=${!vhost_name}&num_virtualhost=${!vhost_nr}" $vhost_url
-    #to="onoff_host"
-            #       hash="on" #status
-            #       servername="vhst-server-name"
-            #       num_virtualhost="vhost-number"
-}
-
-post_data() {
-    curl -s -d "$@" $vhost_url
+send_data() {
+    if [[ "$1" == "add_vhost_2" ]]; then
+        curl -s -d "to=$1&vhost_name=$2&vhost_link=$3" $vhost_url
+    else
+        curl -s -G -d "to=$1&hash=${!vhost_hash}&servername=${!vhost_name}&num_virtualhost=${!vhost_nr}" $vhost_url
+    fi
 }
 
 get_vhost_data() {
     local get_vhost="$1"
     local vhost_nr=vhost[0]
     local vhost_name=vhost[1]
-    local data_rest=$(get_data "status_host")
+    local data_rest=$(send_data "status_host")
     data_rest=${data_rest#*!}
 
     while [[ "$data_rest" != "" ]]; do
@@ -125,26 +121,10 @@ case "$1" in
                 echo "Virtual Host ${!vhost_name} already enabled!"
                 exit 0
             fi
-
-            get_data "onoff_host"
-
-            # # # "$vhost_path" to=
-            # onoff_host&
-            # hash=on&
-            # servername=post.dev&
-            # num_virtualhost=0
-
-            # # "$vhost_path" to=onoff_host&
-            # hash=off&
-            # servername=www.nagyvaradhotel.ro&
-            # num_virtualhost=1
-
-            # "$vhost_path" to=onoff_host&hash=on&servername=dev.nagyvaradhotel.ro&num_virtualhost=2
-            # "$vhost_path" to=onoff_host&hash=off&servername=posticumhost.ro&num_virtualhost=3
-
-
+            send_data "onoff_host"
             echo "VirtualHost ${!vhost_name} up!"
             ;;
+
         d|down)
             # deactivate vhost
             #     GET
@@ -159,9 +139,15 @@ case "$1" in
 
             get_vhost_data "$2"
             echo "VHOST= ${vhost_data[@]}"
+            if [[ ${!vhost_hash} == "off" ]]; then
+                echo "Virtual Host ${!vhost_name} already disabled!"
+                exit 1
+            fi
+            send_data "onoff_host"
 
             echo "VirtualHost ${!vhost_name} down!"
             ;;
+
         a|add)
             # add vhost
             #     POST
@@ -177,6 +163,7 @@ case "$1" in
 
             echo "VirtualHost ${!vhost_name} added!"
             ;;
+
         del|rm|remove|delete)
             # delete vhost
             #     GET
