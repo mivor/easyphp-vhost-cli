@@ -253,140 +253,18 @@ if ((isset($_POST['to'])) and ($_POST['to'] == "add_vhost_2")) {
 //== RETURN STATUS OF VIRTUAL HOST =======================================
 if ((isset($_GET['to'])) and ($_GET['to'] == "status_host")) {
 
-//     // HOSTS FILE
-// $hostsfile_array = read_hostsfile('file');
-// foreach ($hostsfile_array as $line) {
-//     echo $line . "<br></ br>";
-// }
-
     //INC_VIRTUALHOST.conf
     $vhosts_array = read_vhosts('easyphp_vhosts');
     // $new_vhosts_content = '';
     $vhost_rows_array = array();
     $n = 0;
     echo "!";
-    // echo count($vhosts_array) . "\n";
-    // while ($n < count($vhosts_array)) {
-    //     $vhost_rows_array = explode("\n", $vhosts_array[$n][0]);
-
-    //     $pos_vhost_name = stripos($vhost_rows_array[2], 'ServerName');
-    //     $pos_vhost_name += strlen('ServerName') + 1;
-    //     $vhost_name = substr($vhost_rows_array[2], $pos_vhost_name);
-    //     $pos_hash = stripos($vhost_rows_array[2], '#');
-    //     if (($pos_hash !== false) and ($pos_hash < $pos_vhost_name)) {
-    //         $hash = "on";
-    //     } else {
-    //         $hash = "off";
-    //     }
-    //     echo $n . " " . $hash . " " . $vhost_name . "!";
-    //     // echo "vhost_number=" . $n . " ";
-    //     // echo "hash_status=" . $hash . " ";
-    //     // echo "vhost_name=" . $vhost_name;
-    //     // echo "!!!";
-    //     // echo "raw_data=" . $vhost_rows_array[2] . "\n";
-    //     // echo "pos_vhost_name_substr=" . $pos_vhost_name . "\n";
-    //     $n++;
-    // }
     foreach ($vhosts_array as $key => $vhost) {
         $vhost_name=trim($vhost[2]);
         $pos_hash = stripos($vhost[0], '#');
         $switch_hash = ($pos_hash !== false) ? 'off' : 'on';
         echo "$key $vhost_name $switch_hash!";
-        // echo "raw:$vhost[0] <br></br>";
-        // echo "vhost_num:'$key' <br></br>";
-        // echo "vhost_status:'$hash' <br></br>";
-        // echo "vhost_name:'$vhost_name' <br></br>";
     }
-        // $pos_hash = stripos($line,'#');
-        // $pos_127001 = stripos($line,'127.0.0.1');
-        // $pos_servername = stripos($line,$server_name);
-        // if(($pos_127001 !== false) and ($pos_servername !== false)) {
-        //     if (($pos_hash !== false) and ($pos_hash < $pos_127001)) {
-        //         $hash = "on";
-        //     } else {
-        //         $hash = "off";
-        //     }
-        // }
-        // foreach ($vhost_rows_array as $key => $vhost_data) {
-        //     echo $key . "=" . $vhost_data . "<br></ br>";
-        // }
-
-        // if ($n == $_GET['num_virtualhost']) {
-        //     if (strstr($vhost_rows_array[0], '#') !== FALSE) {
-        //         // vhost is commented > we decomment
-        //         foreach ($vhost_rows_array as $vhost_data) {
-        //             $new_vhosts_content .=  str_replace('#', '', $vhost_data) . "\n";
-        //         }
-        //     } else {
-        //         // vhost is not commented > we comment
-        //         foreach ($vhost_rows_array as $vhost_data) {
-        //             $new_vhosts_content .=  "#" . $vhost_data . "\n";
-        //         }
-        //     }
-        // } else {
-        //     foreach ($vhost_rows_array as $vhost_data) {
-        //         $new_vhosts_content .=  $vhost_data . "\n";
-        //     }
-        // }
-
-/*
-        $hash = ($_GET['hash'] == 'on') ? '#':'';
-        $new_hostfile_content = '';
-        foreach ($hostsfile_array as $line) {
-            if((stripos($line,"127.0.0.1") !== false) and (stripos($line,$_GET['servername']) !== false)) {
-                $new_hostfile_content .= $hash . "127.0.0.1  " . $_GET['servername'] . "\n";
-            } else {
-                $new_hostfile_content .= $line . "\n";
-            }
-        }
-
-        // Backup old hosts file
-        copy(get_hostsfile_dir() . "\hosts", get_hostsfile_dir() . "\hosts_" . date("Y-m-d@U"));
-
-        // Save new hosts file
-        file_put_contents(get_hostsfile_dir() . '\hosts', trim($new_hostfile_content));
-
-
-    //INC_VIRTUALHOST.conf
-    $vhosts_array = read_vhosts('easyphp_vhosts');
-    $new_vhosts_content = '';
-    $vhost_rows_array = array();
-    $n = 0;
-    while ($n < count($vhosts_array)) {
-        $vhost_rows_array = explode("\n", $vhosts_array[$n][0]);
-        if ($n == $_GET['num_virtualhost']) {
-            if (strstr($vhost_rows_array[0], '#') !== FALSE) {
-                // vhost is commented > we decomment
-                foreach ($vhost_rows_array as $vhost_data) {
-                    $new_vhosts_content .=  str_replace('#', '', $vhost_data) . "\n";
-                }
-            } else {
-                // vhost is not commented > we comment
-                foreach ($vhost_rows_array as $vhost_data) {
-                    $new_vhosts_content .=  "#" . $vhost_data . "\n";
-                }
-            }
-        } else {
-            foreach ($vhost_rows_array as $vhost_data) {
-                $new_vhosts_content .=  $vhost_data . "\n";
-            }
-        }
-        $n++;
-    }
-
-    // Backup old inc_virtual_hosts.conf
-    copy('../../binaries/apache/conf/inc_virtual_hosts.conf', '../../binaries/apache/conf/inc_virtual_hosts_' . date("Y-m-d@U") . '.conf');
-
-    // Save new inc_virtual_hosts.conf
-    file_put_contents('../../binaries/apache/conf/inc_virtual_hosts.conf', $new_vhosts_content);
-
-    // trigger server restart
-    file_put_contents('../../binaries/conf_files/httpd.conf', file_get_contents('../../binaries/conf_files/httpd.conf'));
-
-    $redirect = "http://" . $_SERVER['HTTP_HOST'] . "/home/index.php";
-    sleep(2);
-    header("Location: " . $redirect);
-    */
     exit;
 }
 //============================================================================
