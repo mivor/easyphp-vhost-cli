@@ -254,17 +254,15 @@ if ((isset($_POST['to'])) and ($_POST['to'] == "add_vhost_2")) {
 if ((isset($_GET['to'])) and ($_GET['to'] == "status_host")) {
 
     //INC_VIRTUALHOST.conf
+    $vhost_data = '!';
     $vhosts_array = read_vhosts('easyphp_vhosts');
-    // $new_vhosts_content = '';
-    $vhost_rows_array = array();
-    $n = 0;
-    echo "!";
     foreach ($vhosts_array as $key => $vhost) {
         $vhost_name=trim($vhost[2]);
         $pos_hash = stripos($vhost[0], '#');
         $switch_hash = ($pos_hash !== false) ? 'off' : 'on';
-        echo "$key $vhost_name $switch_hash!";
+        $vhost_data .= $key . $vhost_name . $switch_hash . '!';
     }
+    echo $vhost_data;
     exit;
 }
 //============================================================================
