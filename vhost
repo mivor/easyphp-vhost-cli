@@ -22,11 +22,23 @@ get_pid() {
     srv_pid=$(ps aux | grep '[E]asyPHP' | awk '{print $1}')
 }
 
+get_data() {
+    curl -s -G -d "to=$1&hash=${!vhost_hash}&servername=${!vhost_name}&num_virtualhost=${!vhost_nr}" $vhost_url
+    #to="onoff_host"
+            #       hash="on" #status
+            #       servername="vhst-server-name"
+            #       num_virtualhost="vhost-number"
+}
+
+post_data() {
+    curl -s -d "$@" $vhost_url
+}
+
 get_vhost_data() {
     local get_vhost="$1"
     local vhost_nr=vhost[0]
     local vhost_name=vhost[1]
-    local data_rest=$(curl -s -G -d "to=status_host" $vhost_url)
+    local data_rest=$(get_data "status_host")
     data_rest=${data_rest#*!}
 
     while [[ "$data_rest" != "" ]]; do
@@ -34,7 +46,7 @@ get_vhost_data() {
         vhost=( ${data_rest%%!*} )
         if [[ "$get_vhost" ]]; then
             if [[ "$get_vhost" == "${!vhost_name}" || "$get_vhost" == "${!vhost_nr}" ]]; then
-                vhost_data=${vhost[@]}
+                vhost_data=( ${vhost[@]} )
                 return
             fi
         else
@@ -109,16 +121,24 @@ case "$1" in
 
             get_vhost_data "$2"
             echo "VHOST= ${vhost_data[@]}"
+            if [[ ${!vhost_hash} == "on" ]]; then
+                echo "Virtual Host ${!vhost_name} already enabled!"
+                exit 0
+            fi
 
-            # # "$vhost_path" to=
-            onoff_host&
-            hash=on&
-            servername=post.dev&
-            num_virtualhost=0
-            # "$vhost_path" to=onoff_host&
-            hash=off&
-            servername=www.nagyvaradhotel.ro&
-            num_virtualhost=1
+            get_data "onoff_host"
+
+            # # # "$vhost_path" to=
+            # onoff_host&
+            # hash=on&
+            # servername=post.dev&
+            # num_virtualhost=0
+
+            # # "$vhost_path" to=onoff_host&
+            # hash=off&
+            # servername=www.nagyvaradhotel.ro&
+            # num_virtualhost=1
+
             # "$vhost_path" to=onoff_host&hash=on&servername=dev.nagyvaradhotel.ro&num_virtualhost=2
             # "$vhost_path" to=onoff_host&hash=off&servername=posticumhost.ro&num_virtualhost=3
 
