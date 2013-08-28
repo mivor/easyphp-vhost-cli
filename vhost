@@ -10,7 +10,10 @@ exe_path="/d/Feri_dolgai/Programs/srv/EasyPHP-DevServer-13.1VC11.exe"
 vhost_url="http://127.0.0.1/modules/virtualhostsmanager/virtualhostsmanager_update.php"
 usage="Usage: vhost {start|stop|restart|status|up|down}"
 srv_pid=""
-
+vhost_data=()
+vhost_nr=vhost_data[0]
+vhost_name=vhost_data[1]
+vhost_hash=vhost_data[2]
 #-------------
 # Functions
 #-------------
@@ -20,41 +23,37 @@ get_pid() {
 }
 
 get_vhost_data() {
-    local data_raw
-    local data_vhost
-    local num
-    data_raw=$(curl -s -G -d "to=status_host" $vhost_url)
-    # echo "raw-data=$data_raw"
-    echo "---------------------------------"
-    data_vhost=${data_raw#*!}
-    echo "vhost_data=$data_vhost"
-    echo "---------------------------------"
-    num=0
-    while [[ "$data_vhost" != "" ]]; do
-        let vhost_$num="empty"
-        vhost_all=vhost_$num[@]
-        eval "vhost_$num=( ${data_vhost%%!*} )"
-        echo ${!vhost_all}
-        # eval $(vhost_${n}=( ${data_vhost%%!*} ))
-        # eval echo "vhost_${n}=${vhost_${n}[@]}"
-        data_vhost=${data_vhost#*!}
-        echo "data_vhost=$data_vhost"
-        echo "---------------------------------"
-        (( num++ ))
+    local get_vhost="$1"
+    local vhost_nr=vhost[0]
+    local vhost_name=vhost[1]
+    local data_rest=$(curl -s -G -d "to=status_host" $vhost_url)
+    data_rest=${data_rest#*!}
+
+    while [[ "$data_rest" != "" ]]; do
+
+        vhost=( ${data_rest%%!*} )
+        if [[ "$get_vhost" ]]; then
+            if [[ "$get_vhost" == "${!vhost_name}" || "$get_vhost" == "${!vhost_nr}" ]]; then
+                vhost_data=${vhost[@]}
+                return
+            fi
+        else
+            echo ${vhost[@]}
+        fi
+        data_rest=${data_rest#*!}
     done
-    echo $num
-    for (( i = 0; i < num; i++ )); do
-        vhost_all=vhost_$i[@]
-        echo ${!vhost_all}
-    done
+
+    if [[ "$get_vhost" && "$vhost_data" == "" ]]; then
+        echo "No vhost found!"
+        exit 1
+    fi
 }
 
 get_pid
 
-echo "$srv_pid"
 # Use cases
 case "$1" in
-        s|start)
+        st|start)
             if [[ "$srv_pid" == "" ]]; then
                 $exe_path&
                 echo "Dev server ready!"
@@ -84,46 +83,18 @@ case "$1" in
             fi
             ;;
 
-        st|stat|status)
+        s|stat|status)
+            # status vhost
             if [[ "$srv_pid" == "" ]]; then
                 echo "No server!"
             else
-                echo "Server running"
+                echo "Server running! Virtual Hosts:"
+                echo "------------------------------"
+                get_vhost_data
             fi
             ;;
 
         u|up)
-            if [[ "$srv_pid" == "" ]]; then
-                echo "No server!"
-                exit 0;
-            fi
-            echo "VirtualHost up! $2"
-            get_vhost_data
-
-
-            # # vhost_1=( ${data%!VHOST_END!*} )
-            # echo ${test_array[@]}
-            # echo "---------------------------------"
-            # echo ${#test_array[@]}
-            # echo "'${test_array[3]}'ghoogle"
-            # echo ${test_array[12]}
-            # # "$vhost_path" to=onoff_host&hash=on&servername=post.dev&num_virtualhost=0#anchor_virtualhostsmanager
-            # "$vhost_path" to=onoff_host&hash=off&servername=www.nagyvaradhotel.ro&num_virtualhost=1#anchor_virtualhostsmanager
-            # "$vhost_path" to=onoff_host&hash=on&servername=dev.nagyvaradhotel.ro&num_virtualhost=2#anchor_virtualhostsmanager
-            # "$vhost_path" to=onoff_host&hash=off&servername=posticumhost.ro&num_virtualhost=3#anchor_virtualhostsmanager
-
-            # add vhost
-            #     POST
-            #     to="add_vhost_2"
-            #     lang="en"
-            #       vhost_name="link-to-vhost" max 65
-            #       vhost_link="path-to-vhost" max 80
-
-            # delete vhost
-            #     GET
-            #     to="del_virtualhost"
-            #       num_virtualhost="virtualhost-number"
-
             # activate vhost
             #     GET
             #     to="onoff_host"
@@ -131,18 +102,75 @@ case "$1" in
             #       servername="vhst-server-name"
             #       num_virtualhost="vhost-number"
 
+            if [[ "$srv_pid" == "" ]]; then
+                echo "No server!"
+                exit 0;
+            fi
+
+            get_vhost_data "$2"
+            echo "VHOST= ${vhost_data[@]}"
+
+            # # "$vhost_path" to=
+            onoff_host&
+            hash=on&
+            servername=post.dev&
+            num_virtualhost=0
+            # "$vhost_path" to=onoff_host&
+            hash=off&
+            servername=www.nagyvaradhotel.ro&
+            num_virtualhost=1
+            # "$vhost_path" to=onoff_host&hash=on&servername=dev.nagyvaradhotel.ro&num_virtualhost=2
+            # "$vhost_path" to=onoff_host&hash=off&servername=posticumhost.ro&num_virtualhost=3
+
+
+            echo "VirtualHost ${!vhost_name} up!"
+            ;;
+        d|down)
             # deactivate vhost
             #     GET
             #     to="onoff_host"
             #       hash="on" #status
             #       servername="vhst-server-name"
             #       num_virtualhost="vhost-number"
+            if [[ "$srv_pid" == "" ]]; then
+                echo "No server!"
+                exit 0;
+            fi
 
-            # status vhost
+            get_vhost_data "$2"
+            echo "VHOST= ${vhost_data[@]}"
+
+            echo "VirtualHost ${!vhost_name} down!"
             ;;
-        d|down)
-            echo "VirtualHost down!"
+        a|add)
+            # add vhost
+            #     POST
+            #     to="add_vhost_2"
+            #     lang="en"
+            #       vhost_name="link-to-vhost" max 65
+            #       vhost_link="path-to-vhost" max 80
+            if [[ "$srv_pid" == "" ]]; then
+                echo "No server!"
+                exit 0;
+            fi
+
+
+            echo "VirtualHost ${!vhost_name} added!"
             ;;
+        del|rm|remove|delete)
+            # delete vhost
+            #     GET
+            #     to="del_virtualhost"
+            #       num_virtualhost="virtualhost-number"
+            if [[ "$srv_pid" == "" ]]; then
+                echo "No server!"
+                exit 0;
+            fi
+
+
+            echo "VirtualHost ${!vhost_name} removed!"
+            ;;
+
         *)
             echo "$usage"
             exit 1
