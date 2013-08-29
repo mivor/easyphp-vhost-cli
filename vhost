@@ -187,6 +187,24 @@ find_action() {
                 echo "Virtual host ${!vhost_name} removed!"
                 ;;
 
+            launch|open|l|o)
+                # open virtual host in default browser
+                case $2 in
+                    '' )
+                        start http://127.0.0.1
+                        ;;
+
+                    home|h )
+                        start http://127.0.0.1/home
+                        ;;
+
+                    * )
+                        get_vhost_data "--get" "$2"
+                        start http://${!vhost_name}
+                        ;;
+                esac
+                ;;
+
             *)
                 echo_and_die "$usage"
     esac
