@@ -115,10 +115,19 @@ case "$1" in
             ;;
 
         rs|rst|restart)
-            # restart server
-            kill "$srv_pid"
-            $exe_path&
-            echo "Dev server reseted!"
+            # restart server or virtual host
+            if [[ "$#" -gt 1 ]]; then
+                echo "Please wait, restarting..."
+                get_vhost_data "--get" $2
+                send_data "onoff_host"
+                get_vhost_data "--get" $2
+                send_data "onoff_host"
+                echo "Virtual host restarted!"
+            else
+                kill "$srv_pid"
+                $exe_path&
+                echo "Dev server restarted!"
+            fi
             ;;
 
         s|stat|status)
