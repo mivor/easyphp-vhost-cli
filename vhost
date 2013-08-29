@@ -140,7 +140,6 @@ case "$1" in
             #       servername="vhst-server-name"
             #       num_virtualhost="vhost-number"
             get_vhost_data "$2"
-            echo "VHOST= ${vhost_data[@]}"
             if [[ ${!vhost_hash} == "on" ]]; then
                 echo_and_die "Virtual host ${!vhost_name} already enabled!"
             fi
@@ -156,7 +155,6 @@ case "$1" in
             #       servername="vhst-server-name"
             #       num_virtualhost="vhost-number"
             get_vhost_data "$2"
-            echo "VHOST= ${vhost_data[@]}"
             if [[ ${!vhost_hash} == "off" ]]; then
                 echo_and_die "Virtual host ${!vhost_name} already disabled!"
             fi
@@ -173,7 +171,6 @@ case "$1" in
             #       vhost_name="link-to-vhost" max 65
             #       vhost_link="path-to-vhost" max 80
             get_vhost_data "--check" $2
-            echo "VHOST= ${vhost_data[@]}"
             if [[ "${vhost_data[@]}" ]]; then
                 echo_and_die "Virtual host ${!vhost_name} already exists!"
             fi
@@ -187,7 +184,6 @@ case "$1" in
             #     to="del_virtualhost"
             #       num_virtualhost="virtualhost-number"
             get_vhost_data "$2"
-            echo "VHOST= ${vhost_data[@]}"
             send_data "del_virtualhost"
             echo "Virtual host ${!vhost_name} removed!"
             ;;
