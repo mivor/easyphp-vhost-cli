@@ -124,9 +124,16 @@ case "$1" in
 
         s|stat|status)
             # status vhost
-            echo "Server running! Virtual hosts:"
-            echo "------------------------------"
-            get_vhost_data
+            if [[ "$#" -gt 1 ]]; then
+                get_vhost_data "--get" $2
+                echo "Server running! Virtual host:"
+                echo "--------------------------------"
+                printf "%2d %25s %s\n" ${vhost_data[0]} ${vhost_data[1]} ${vhost_data[2]}
+            else
+                echo "Server running! Virtual hosts:"
+                echo "--------------------------------"
+                get_vhost_data
+            fi
             ;;
 
         u|up)
