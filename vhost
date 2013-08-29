@@ -45,7 +45,7 @@ unset_vars() {
 
 echo_and_die() {
     if [[ "$@" ]]; then
-        echo "$@"
+        echo "ERROR: $@"
     fi
     unset_vars
     exit 1
