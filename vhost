@@ -78,7 +78,7 @@ get_vhost_data() {
                 return 0
             fi
         else
-            echo ${vhost[@]}
+            printf "%2d %25s %s\n" ${vhost[0]} ${vhost[1]} ${vhost[2]}
         fi
         data_rest=${data_rest#*!}
     done
