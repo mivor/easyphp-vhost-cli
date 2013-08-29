@@ -52,7 +52,23 @@ echo_and_die() {
 }
 
 get_vhost_data() {
-    local get_vhost="$1"
+    if [[ "$#" == 1 ]]; then
+        local get_vhost="$1"
+        local action="get"
+    else
+        local get_vhost="$2"
+        case $1 in
+            get|-get|--get|-g )
+                local action="get"
+                ;;
+            check|-check|--check|-chk|-c|-ck )
+                local action="check"
+                ;;
+            * )
+                echo_and_die "Not a valid option!"
+                ;;
+        esac
+    fi
     local vhost_nr=vhost[0]
     local vhost_name=vhost[1]
     local data_rest=$(send_data "status_host")
@@ -61,10 +77,10 @@ get_vhost_data() {
     while [[ "$data_rest" ]]; do
 
         vhost=( ${data_rest%%!*} )
-        if [[ "$get_vhost" ]]; then
+        if [[ "$action" == "get" ]]; then
             if [[ "$get_vhost" == "${!vhost_name}" || "$get_vhost" == "${!vhost_nr}" ]]; then
                 vhost_data=( ${vhost[@]} )
-                return
+                return 0
             fi
         else
             echo ${vhost[@]}
@@ -72,8 +88,8 @@ get_vhost_data() {
         data_rest=${data_rest#*!}
     done
 
-    if [[ "$get_vhost" && "$vhost_data" == "" ]]; then
-        echo "No vhost found!"
+    if [[ "$action" == "get" && "$vhost_data" == "" ]]; then
+        echo_and_die "No vhost found!"
     fi
 }
 
@@ -113,7 +129,7 @@ case "$1" in
             # status vhost
             echo "Server running! Virtual Hosts:"
             echo "------------------------------"
-            get_vhost_data
+            get_vhost_data --check
             ;;
 
         u|up)
@@ -156,7 +172,8 @@ case "$1" in
             #     lang="en"
             #       vhost_name="link-to-vhost" max 65
             #       vhost_link="path-to-vhost" max 80
-            get_vhost_data "$2"
+            get_vhost_data "--check" $2
+            echo "VHOST= ${vhost_data[@]}"
             if [[ "${vhost_data[@]}" ]]; then
                 echo_and_die "Virtual Host ${!vhost_name} already exists!"
             fi
