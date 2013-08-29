@@ -52,10 +52,7 @@ echo_and_die() {
 }
 
 get_vhost_data() {
-    if [[ "$#" == 1 ]]; then
-        local get_vhost="$1"
-        local action="get"
-    else
+    if [[ "$#" -gt 1 ]]; then
         local get_vhost="$2"
         case $1 in
             get|-get|--get|-g )
@@ -73,11 +70,9 @@ get_vhost_data() {
     local vhost_name=vhost[1]
     local data_rest=$(send_data "status_host")
     data_rest=${data_rest#*!}
-
     while [[ "$data_rest" ]]; do
-
         vhost=( ${data_rest%%!*} )
-        if [[ "$action" == "get" ]]; then
+        if [[ "$get_vhost" ]]; then
             if [[ "$get_vhost" == "${!vhost_name}" || "$get_vhost" == "${!vhost_nr}" ]]; then
                 vhost_data=( ${vhost[@]} )
                 return 0
@@ -87,7 +82,6 @@ get_vhost_data() {
         fi
         data_rest=${data_rest#*!}
     done
-
     if [[ "$action" == "get" && "$vhost_data" == "" ]]; then
         echo_and_die "No vhost found!"
     fi
@@ -132,12 +126,12 @@ case "$1" in
             # status vhost
             echo "Server running! Virtual hosts:"
             echo "------------------------------"
-            get_vhost_data --check
+            get_vhost_data
             ;;
 
         u|up)
             # activate vhost
-            get_vhost_data "$2"
+            get_vhost_data "--get" "$2"
             if [[ ${!vhost_hash} == "on" ]]; then
                 echo_and_die "Virtual host ${!vhost_name} already enabled!"
             fi
@@ -147,7 +141,7 @@ case "$1" in
 
         d|down)
             # deactivate vhost
-            get_vhost_data "$2"
+            get_vhost_data "--get" "$2"
             if [[ ${!vhost_hash} == "off" ]]; then
                 echo_and_die "Virtual host ${!vhost_name} already disabled!"
             fi
@@ -170,7 +164,7 @@ case "$1" in
 
         del|rm|remove|delete)
             # delete vhost
-            get_vhost_data "$2"
+            get_vhost_data "--get" "$2"
             send_data "del_virtualhost"
             echo "Virtual host ${!vhost_name} removed!"
             ;;
