@@ -23,10 +23,12 @@ get_pid() {
 }
 
 send_data() {
-    if [[ "$1" == "add_vhost_2" ]]; then
-        curl -s -d "to=$1&vhost_name=$2&vhost_link=$3" $vhost_url
-    else
+    if [[ "$1" == "status_host" ]]; then
         curl -s -G -d "to=$1&hash=${!vhost_hash}&servername=${!vhost_name}&num_virtualhost=${!vhost_nr}" $vhost_url
+    elif [[ "$1" == "add_vhost_2" ]]; then
+        curl -s -d "to=$1&vhost_name=$2&vhost_link=$3" $vhost_url > /dev/null
+    else
+        curl -s -G -d "to=$1&hash=${!vhost_hash}&servername=${!vhost_name}&num_virtualhost=${!vhost_nr}" $vhost_url > /dev/null
     fi
 }
 
