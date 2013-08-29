@@ -59,7 +59,7 @@ get_vhost_data() {
                 return 0
             fi
         else
-            printf "%2d %25s %3s %s\n" ${vhost[0]} ${vhost[1]} ${vhost[2]} ${vhost[3]}
+            printf "%2d %-3s %-25s %s\n" ${vhost[0]} ${vhost[2]} ${vhost[1]} ${vhost[3]}
         fi
         data_rest=${data_rest#*!}
     done
@@ -143,7 +143,7 @@ find_action() {
                     get_vhost_data "--get" $2
                     echo "Server running! Virtual host:"
                     echo "--------------------------------"
-                    printf "%2d %25s %3s %s\n" ${vhost_data[0]} ${vhost_data[1]} ${vhost_data[2]} ${vhost_data[3]}
+                    printf "%2d %-3s %-25s %s\n" ${vhost_data[0]} ${vhost_data[2]} ${vhost_data[1]} ${vhost_data[3]}
                 else
                     echo "Server running! Virtual hosts:"
                     echo "--------------------------------"
