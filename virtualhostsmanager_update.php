@@ -260,7 +260,9 @@ if ((isset($_GET['to'])) and ($_GET['to'] == "status_host")) {
         $vhost_name=trim($vhost[2]);
         $pos_hash = stripos($vhost[0], '#');
         $switch_hash = ($pos_hash !== false) ? 'off' : 'on';
-        $vhost_data .= $key . $vhost_name . $switch_hash . '!';
+        $vhost_data .= $key . ' ';
+        $vhost_data .= $vhost_name . ' ';
+        $vhost_data .= $switch_hash . '!';
     }
     echo $vhost_data;
     exit;
