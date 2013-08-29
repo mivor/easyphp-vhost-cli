@@ -158,7 +158,7 @@ case "$1" in
             if [[ "${vhost_data[@]}" ]]; then
                 echo_and_die "Virtual Host ${!vhost_name} already exists!"
             fi
-            send_data "add_vhost_2 $2 $3"
+            send_data "add_vhost_2" $2 $3
             echo "VirtualHost ${!vhost_name} added!"
             ;;
 
