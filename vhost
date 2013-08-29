@@ -14,13 +14,11 @@ vhost_data=()
 vhost_nr=vhost_data[0]
 vhost_name=vhost_data[1]
 vhost_hash=vhost_data[2]
+
 #-------------
 # Functions
 #-------------
 
-get_pid() {
-    srv_pid=$(ps aux | grep '[E]asyPHP' | awk '{print $1}')
-}
 
 send_data() {
     if [[ "$1" == "status_host" ]]; then
@@ -30,25 +28,6 @@ send_data() {
     else
         curl -s -G -d "to=$1&hash=${!vhost_hash}&servername=${!vhost_name}&num_virtualhost=${!vhost_nr}" $vhost_url > /dev/null
     fi
-}
-
-unset_vars() {
-    unset exe_path
-    unset vhost_url
-    unset usage
-    unset srv_pid
-    unset vhost_data
-    unset vhost_nr
-    unset vhost_name
-    unset vhost_hash
-}
-
-echo_and_die() {
-    if [[ "$@" ]]; then
-        echo "ERROR: $@"
-    fi
-    unset_vars
-    exit 1
 }
 
 get_vhost_data() {
@@ -87,103 +66,136 @@ get_vhost_data() {
     fi
 }
 
-get_pid
+unset_vars() {
+    unset exe_path
+    unset vhost_url
+    unset usage
+    unset srv_pid
+    unset vhost_data
+    unset vhost_nr
+    unset vhost_name
+    unset vhost_hash
+}
 
-# check if server is running
-if [[ "$srv_pid" == "" && !("$1" == "st" || "$1" == "start") ]]; then
-    echo "No server found!"
-    echo "(use: \"vhost start\" to start one)"
-    echo_and_die
-fi
+echo_and_die() {
+    if [[ "$@" ]]; then
+        echo "ERROR: $@"
+    fi
+    unset_vars
+    exit 1
+}
 
-# Use cases
-case "$1" in
-        st|start)
-            # start server
-            if [[ "$srv_pid" == "" ]]; then
-                $exe_path&
-                echo "Dev server ready!"
-            else
-                echo_and_die "Server already running!"
-            fi
-            ;;
+get_pid() {
+    srv_pid=$(ps aux | grep '[E]asyPHP' | awk '{print $1}')
+}
 
-        k|kill|stop)
-            # stop server
-            kill "$srv_pid"
-            echo "Dev server shut down!"
-            ;;
+check_server() {
+    # check if server is running
+    if [[ "$srv_pid" == "" && !("$1" == "st" || "$1" == "start") ]]; then
+        echo "ERROR: No server found!"
+        echo "(use: \"vhost start\" to start one)"
+        echo_and_die
+    fi
+}
 
-        rs|rst|restart)
-            # restart server or virtual host
-            if [[ "$#" -gt 1 ]]; then
-                echo "Please wait, restarting..."
-                get_vhost_data "--get" $2
-                send_data "onoff_host"
-                get_vhost_data "--get" $2
-                send_data "onoff_host"
-                echo "Virtual host restarted!"
-            else
+find_action() {
+    # Find action
+    case "$1" in
+            st|start)
+                # start server
+                if [[ "$srv_pid" == "" ]]; then
+                    $exe_path&
+                    echo "Dev server ready!"
+                else
+                    echo_and_die "Server already running!"
+                fi
+                ;;
+
+            k|kill|stop)
+                # stop server
                 kill "$srv_pid"
-                $exe_path&
-                echo "Dev server restarted!"
-            fi
-            ;;
+                echo "Dev server shut down!"
+                ;;
 
-        s|stat|status)
-            # status vhost
-            if [[ "$#" -gt 1 ]]; then
-                get_vhost_data "--get" $2
-                echo "Server running! Virtual host:"
-                echo "--------------------------------"
-                printf "%2d %25s %s\n" ${vhost_data[0]} ${vhost_data[1]} ${vhost_data[2]}
-            else
-                echo "Server running! Virtual hosts:"
-                echo "--------------------------------"
-                get_vhost_data
-            fi
-            ;;
+            rs|rst|restart)
+                # restart server or virtual host
+                if [[ "$#" -gt 1 ]]; then
+                    echo "Please wait, restarting..."
+                    get_vhost_data "--get" $2
+                    send_data "onoff_host"
+                    get_vhost_data "--get" $2
+                    send_data "onoff_host"
+                    echo "Virtual host restarted!"
+                else
+                    kill "$srv_pid"
+                    $exe_path&
+                    echo "Dev server restarted!"
+                fi
+                ;;
 
-        u|up)
-            # activate vhost
-            get_vhost_data "--get" "$2"
-            if [[ ${!vhost_hash} == "on" ]]; then
-                echo_and_die "Virtual host ${!vhost_name} already enabled!"
-            fi
-            send_data "onoff_host"
-            echo "Virtual host ${!vhost_name} up!"
-            ;;
+            s|stat|status)
+                # status vhost
+                if [[ "$#" -gt 1 ]]; then
+                    get_vhost_data "--get" $2
+                    echo "Server running! Virtual host:"
+                    echo "--------------------------------"
+                    printf "%2d %25s %s\n" ${vhost_data[0]} ${vhost_data[1]} ${vhost_data[2]}
+                else
+                    echo "Server running! Virtual hosts:"
+                    echo "--------------------------------"
+                    get_vhost_data
+                fi
+                ;;
 
-        d|down)
-            # deactivate vhost
-            get_vhost_data "--get" "$2"
-            if [[ ${!vhost_hash} == "off" ]]; then
-                echo_and_die "Virtual host ${!vhost_name} already disabled!"
-            fi
-            send_data "onoff_host"
+            u|up)
+                # activate vhost
+                get_vhost_data "--get" "$2"
+                if [[ ${!vhost_hash} == "on" ]]; then
+                    echo_and_die "Virtual host ${!vhost_name} already enabled!"
+                fi
+                send_data "onoff_host"
+                echo "Virtual host ${!vhost_name} up!"
+                ;;
 
-            echo "Virtual host ${!vhost_name} down!"
-            ;;
+            d|down)
+                # deactivate vhost
+                get_vhost_data "--get" "$2"
+                if [[ ${!vhost_hash} == "off" ]]; then
+                    echo_and_die "Virtual host ${!vhost_name} already disabled!"
+                fi
+                send_data "onoff_host"
 
-        a|add)
-            # add vhost
-            # $2=link-to-vhost max 65 chr
-            # $3=D:/path/to/vhost max 80 chr
-            get_vhost_data "--check" $2
-            if [[ "${vhost_data[@]}" ]]; then
-                echo_and_die "Virtual host ${!vhost_name} already exists!"
-            fi
-            send_data "add_vhost_2" $2 $3
-            echo "Virtual host ${!vhost_name} added!"
-            ;;
+                echo "Virtual host ${!vhost_name} down!"
+                ;;
 
-        del|rm|remove|delete)
-            # delete vhost
-            get_vhost_data "--get" "$2"
-            send_data "del_virtualhost"
-            echo "Virtual host ${!vhost_name} removed!"
-            ;;
+            a|add)
+                # add vhost
+                # $2=link-to-vhost max 65 chr
+                # $3=D:/path/to/vhost max 80 chr
+                get_vhost_data "--check" $2
+                if [[ "${vhost_data[@]}" ]]; then
+                    echo_and_die "Virtual host ${!vhost_name} already exists!"
+                fi
+                send_data "add_vhost_2" $2 $3
+                echo "Virtual host ${!vhost_name} added!"
+                ;;
 
-        *)
-            echo_and_die "$usage"
-esac
+            del|rm|remove|delete)
+                # delete vhost
+                get_vhost_data "--get" "$2"
+                send_data "del_virtualhost"
+                echo "Virtual host ${!vhost_name} removed!"
+                ;;
+
+            *)
+                echo_and_die "$usage"
+    esac
+}
+
+Main() {
+    get_pid
+    check_server "$@"
+    find_action "$@"
+}
+
+Main "$@"
