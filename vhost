@@ -105,6 +105,7 @@ fi
 # Use cases
 case "$1" in
         st|start)
+            # start server
             if [[ "$srv_pid" ]]; then
                 echo "Server already running!"
             fi
@@ -113,11 +114,13 @@ case "$1" in
             ;;
 
         k|kill|stop)
+            # stop server
             kill "$srv_pid"
             echo "Dev server shut down!"
             ;;
 
         rs|rst|restart)
+            # restart server
             kill "$srv_pid"
             $exe_path&
             get_pid
@@ -134,11 +137,6 @@ case "$1" in
 
         u|up)
             # activate vhost
-            #     GET
-            #     to="onoff_host"
-            #       hash="off" #status
-            #       servername="vhst-server-name"
-            #       num_virtualhost="vhost-number"
             get_vhost_data "$2"
             if [[ ${!vhost_hash} == "on" ]]; then
                 echo_and_die "Virtual host ${!vhost_name} already enabled!"
@@ -149,11 +147,6 @@ case "$1" in
 
         d|down)
             # deactivate vhost
-            #     GET
-            #     to="onoff_host"
-            #       hash="on" #status
-            #       servername="vhst-server-name"
-            #       num_virtualhost="vhost-number"
             get_vhost_data "$2"
             if [[ ${!vhost_hash} == "off" ]]; then
                 echo_and_die "Virtual host ${!vhost_name} already disabled!"
@@ -165,11 +158,8 @@ case "$1" in
 
         a|add)
             # add vhost
-            #     POST
-            #     to="add_vhost_2"
-            #     lang="en"
-            #       vhost_name="link-to-vhost" max 65
-            #       vhost_link="path-to-vhost" max 80
+            # $2=link-to-vhost max 65 chr
+            # $3=D:/path/to/vhost max 80 chr
             get_vhost_data "--check" $2
             if [[ "${vhost_data[@]}" ]]; then
                 echo_and_die "Virtual host ${!vhost_name} already exists!"
@@ -180,9 +170,6 @@ case "$1" in
 
         del|rm|remove|delete)
             # delete vhost
-            #     GET
-            #     to="del_virtualhost"
-            #       num_virtualhost="virtualhost-number"
             get_vhost_data "$2"
             send_data "del_virtualhost"
             echo "Virtual host ${!vhost_name} removed!"
