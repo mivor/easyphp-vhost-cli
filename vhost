@@ -117,8 +117,6 @@ case "$1" in
             # restart server
             kill "$srv_pid"
             $exe_path&
-            get_pid
-            echo "$srv_pid"
             echo "Dev server reseted!"
             ;;
 
