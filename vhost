@@ -100,11 +100,12 @@ fi
 case "$1" in
         st|start)
             # start server
-            if [[ "$srv_pid" ]]; then
-                echo "Server already running!"
+            if [[ "$srv_pid" == "" ]]; then
+                $exe_path&
+                echo "Dev server ready!"
+            else
+                echo_and_die "Server already running!"
             fi
-            $exe_path&
-            echo "Dev server ready!"
             ;;
 
         k|kill|stop)
