@@ -14,6 +14,7 @@ vhost_data=()
 vhost_nr=vhost_data[0]
 vhost_name=vhost_data[1]
 vhost_hash=vhost_data[2]
+vhost_path=vhost_data[3]
 
 #-------------
 # Functions
@@ -57,7 +58,7 @@ get_vhost_data() {
                 return 0
             fi
         else
-            printf "%2d %25s %s\n" ${vhost[0]} ${vhost[1]} ${vhost[2]}
+            printf "%2d %25s %3s %s\n" ${vhost[0]} ${vhost[1]} ${vhost[2]} ${vhost[3]}
         fi
         data_rest=${data_rest#*!}
     done
@@ -75,6 +76,7 @@ unset_vars() {
     unset vhost_nr
     unset vhost_name
     unset vhost_hash
+    unset vhost_path
 }
 
 echo_and_die() {
@@ -139,7 +141,7 @@ find_action() {
                     get_vhost_data "--get" $2
                     echo "Server running! Virtual host:"
                     echo "--------------------------------"
-                    printf "%2d %25s %s\n" ${vhost_data[0]} ${vhost_data[1]} ${vhost_data[2]}
+                    printf "%2d %25s %3s %s\n" ${vhost_data[0]} ${vhost_data[1]} ${vhost_data[2]} ${vhost_data[3]}
                 else
                     echo "Server running! Virtual hosts:"
                     echo "--------------------------------"
