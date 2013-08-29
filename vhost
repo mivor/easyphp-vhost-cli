@@ -6,8 +6,9 @@
 # Variables
 #-------------
 
-exe_path="/d/Feri_dolgai/Programs/srv/EasyPHP-DevServer-13.1VC11.exe"
-vhost_url="http://127.0.0.1/modules/virtualhostsmanager/virtualhostsmanager_update.php"
+install_path="d:/Feri_dolgai/Programs/srv"
+exe_path="$install_path/EasyPHP-DevServer-13.1VC11.exe"
+php_url="http://127.0.0.1/modules/virtualhostsmanager/virtualhostsmanager_update.php"
 usage="Usage: vhost {start|stop|restart|status|up|down|add|remove}"
 srv_pid=""
 vhost_data=()
@@ -23,11 +24,11 @@ vhost_path=vhost_data[3]
 
 send_data() {
     if [[ "$1" == "status_host" ]]; then
-        curl -s -G -d "to=$1&hash=${!vhost_hash}&servername=${!vhost_name}&num_virtualhost=${!vhost_nr}" $vhost_url
+        curl -s -G -d "to=$1&hash=${!vhost_hash}&servername=${!vhost_name}&num_virtualhost=${!vhost_nr}" $php_url
     elif [[ "$1" == "add_vhost_2" ]]; then
-        curl -s -d "to=$1&vhost_name=$2&vhost_link=$3" $vhost_url > /dev/null
+        curl -s -d "to=$1&vhost_name=$2&vhost_link=$3" $php_url > /dev/null
     else
-        curl -s -G -d "to=$1&hash=${!vhost_hash}&servername=${!vhost_name}&num_virtualhost=${!vhost_nr}" $vhost_url > /dev/null
+        curl -s -G -d "to=$1&hash=${!vhost_hash}&servername=${!vhost_name}&num_virtualhost=${!vhost_nr}" $php_url > /dev/null
     fi
 }
 
@@ -68,8 +69,9 @@ get_vhost_data() {
 }
 
 unset_vars() {
+    unset install_path
     unset exe_path
-    unset vhost_url
+    unset php_url
     unset usage
     unset srv_pid
     unset vhost_data
