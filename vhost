@@ -127,7 +127,7 @@ case "$1" in
 
         s|stat|status)
             # status vhost
-            echo "Server running! Virtual Hosts:"
+            echo "Server running! Virtual hosts:"
             echo "------------------------------"
             get_vhost_data --check
             ;;
@@ -142,10 +142,10 @@ case "$1" in
             get_vhost_data "$2"
             echo "VHOST= ${vhost_data[@]}"
             if [[ ${!vhost_hash} == "on" ]]; then
-                echo_and_die "Virtual Host ${!vhost_name} already enabled!"
+                echo_and_die "Virtual host ${!vhost_name} already enabled!"
             fi
             send_data "onoff_host"
-            echo "VirtualHost ${!vhost_name} up!"
+            echo "Virtual host ${!vhost_name} up!"
             ;;
 
         d|down)
@@ -158,11 +158,11 @@ case "$1" in
             get_vhost_data "$2"
             echo "VHOST= ${vhost_data[@]}"
             if [[ ${!vhost_hash} == "off" ]]; then
-                echo_and_die "Virtual Host ${!vhost_name} already disabled!"
+                echo_and_die "Virtual host ${!vhost_name} already disabled!"
             fi
             send_data "onoff_host"
 
-            echo "VirtualHost ${!vhost_name} down!"
+            echo "Virtual host ${!vhost_name} down!"
             ;;
 
         a|add)
@@ -175,10 +175,10 @@ case "$1" in
             get_vhost_data "--check" $2
             echo "VHOST= ${vhost_data[@]}"
             if [[ "${vhost_data[@]}" ]]; then
-                echo_and_die "Virtual Host ${!vhost_name} already exists!"
+                echo_and_die "Virtual host ${!vhost_name} already exists!"
             fi
             send_data "add_vhost_2" $2 $3
-            echo "VirtualHost ${!vhost_name} added!"
+            echo "Virtual host ${!vhost_name} added!"
             ;;
 
         del|rm|remove|delete)
@@ -189,7 +189,7 @@ case "$1" in
             get_vhost_data "$2"
             echo "VHOST= ${vhost_data[@]}"
             send_data "del_virtualhost"
-            echo "VirtualHost ${!vhost_name} removed!"
+            echo "Virtual host ${!vhost_name} removed!"
             ;;
 
         *)
