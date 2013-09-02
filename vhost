@@ -191,15 +191,15 @@ find_action() {
                 echo "Virtual host ${!vhost_name} removed!"
                 ;;
 
-            launch|open|l|o)
+            browse|launch|open|b|l|o)
                 # open virtual host in default browser
                 case $2 in
                     '' )
-                        start http://127.0.0.1
+                        start http://127.0.0.1/home
                         ;;
 
                     home|h )
-                        start http://127.0.0.1/home
+                        start http://127.0.0.1
                         ;;
 
                     * )
